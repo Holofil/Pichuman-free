@@ -1,0 +1,143 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!1 &2280847574644996127
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 2280847574644996125}
+  - component: {fileID: 2280847574644996126}
+  m_Layer: 0
+  m_Name: Game Manager
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &2280847574644996125
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2280847574644996127}
+  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_RootOrder: 0
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &2280847574644996126
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2280847574644996127}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: cef0cc138617264418d835b7e0a3cf46, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  MazeData:
+  - MazeObject: {fileID: 0}
+    GhostsPosition:
+    - {x: 0, y: 0.5, z: 2.1}
+    - {x: 0.02, y: 0.5, z: 0.54}
+    - {x: -1.83, y: 0.5, z: 0.54}
+    - {x: 1.93, y: 0.5, z: 0.54}
+    - {x: -1.5, y: 0.5, z: 2.1}
+    PacmanPos: {x: 0, y: 0.45, z: -4}
+  - MazeObject: {fileID: 0}
+    GhostsPosition:
+    - {x: 0, y: 0.5, z: 2.1}
+    - {x: 0.02, y: 0.5, z: 0.54}
+    - {x: -1.83, y: 0.5, z: 0.54}
+    - {x: 1.93, y: 0.5, z: 0.54}
+    - {x: -1.5, y: 0.5, z: 2.1}
+    PacmanPos: {x: 0, y: 0.45, z: -4}
+  - MazeObject: {fileID: 0}
+    GhostsPosition:
+    - {x: 0, y: 0.5, z: 2.1}
+    - {x: 0.02, y: 0.5, z: 0.54}
+    - {x: -1.83, y: 0.5, z: 0.54}
+    - {x: 1.93, y: 0.5, z: 0.54}
+    - {x: -1.5, y: 0.5, z: 2.1}
+    PacmanPos: {x: 0, y: 0.45, z: -4}
+  - MazeObject: {fileID: 0}
+    GhostsPosition:
+    - {x: 0, y: 0.5, z: 2.1}
+    - {x: 0.02, y: 0.5, z: 0.54}
+    - {x: -1.83, y: 0.5, z: 0.54}
+    - {x: 1.93, y: 0.5, z: 0.54}
+    - {x: -1.5, y: 0.5, z: 2.1}
+    PacmanPos: {x: 0, y: 0.45, z: -4}
+  - MazeObject: {fileID: 0}
+    GhostsPosition:
+    - {x: 0, y: 0.5, z: 2.1}
+    - {x: 0.02, y: 0.5, z: 0.54}
+    - {x: -1.83, y: 0.5, z: 0.54}
+    - {x: 1.93, y: 0.5, z: 0.54}
+    - {x: -1.5, y: 0.5, z: 2.1}
+    PacmanPos: {x: 0, y: 0.45, z: -4}
+  - MazeObject: {fileID: 0}
+    GhostsPosition:
+    - {x: 0, y: 0.5, z: 2.1}
+    - {x: 0.02, y: 0.5, z: 0.54}
+    - {x: -1.83, y: 0.5, z: 0.54}
+    - {x: 1.93, y: 0.5, z: 0.54}
+    - {x: -1.5, y: 0.5, z: 2.1}
+    PacmanPos: {x: 0, y: 0.45, z: -4}
+  - MazeObject: {fileID: 0}
+    GhostsPosition:
+    - {x: 0, y: 0.5, z: 2.1}
+    - {x: 0.02, y: 0.5, z: 0.54}
+    - {x: -1.83, y: 0.5, z: 0.54}
+    - {x: 1.93, y: 0.5, z: 0.54}
+    - {x: -1.5, y: 0.5, z: 2.1}
+    PacmanPos: {x: 0, y: 0.45, z: -4}
+  - MazeObject: {fileID: 0}
+    GhostsPosition:
+    - {x: 0, y: 0.5, z: 2.1}
+    - {x: 0.02, y: 0.5, z: 0.54}
+    - {x: -1.83, y: 0.5, z: 0.54}
+    - {x: 1.93, y: 0.5, z: 0.54}
+    - {x: -1.5, y: 0.5, z: 2.1}
+    PacmanPos: {x: 0, y: 0.45, z: -4}
+  GhostShootingGameCount: 5
+  GhostSpeed: 2.4
+  MoveingNextLevelTime: 6
+  MoveingNextLevelTextPanel: {fileID: 0}
+  TargetFrameRate: 60
+  PacmanReturnTime: 4
+  ghosts:
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
+  pacman: {fileID: 0}
+  gameOverText: {fileID: 0}
+  scoreText: {fileID: 0}
+  livesText: {fileID: 0}
+  TimeText: {fileID: 0}
+  CamMovingObjects:
+  - {fileID: 0}
+  - {fileID: 0}
+  PausedScreen: {fileID: 0}
+  ResumeDuration: 4
+  ResumeCountDownObject: {fileID: 0}
+  RotatedGameObjects:
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
