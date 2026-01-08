@@ -4,27 +4,26 @@ using System.Linq;
 
 /// <summary>
 /// Handles ad timing using three coordinated timers:
-/// 1. Global timer → Tracks total time since game start (never stops)
+/// 1. Global timer → Tracks total time since game start
 /// 2. Menu (UI) timer → Tracks time spent in UI scene
 /// 3. Game timer → Tracks time spent in gameplay scene
-/// 
-/// Ad logic:
-/// - If total (global) time >= 120 seconds and player returns to UI scene, show ad.
-/// - Timer continues across scenes and resets only after showing an ad.
+///
+/// Ads are shown only in UI scene, once every 90 seconds.
 /// </summary>
 public class AdTimerManager : MonoBehaviour
 {
-    private const float AdTriggerTime = 30f; // ⏱ 2 minutes i.e 120 seconds
+    private const float AdTriggerTime = 90f; // 90 seconds between ads
+
+    private float globalTime = 0f;
+    private float uiSceneTime = 0f;
+    private float gameSceneTime = 0f;
+
     private int adsShownCount = 0;
-    private UpgradePopupManager popupManager;
-
-    private float globalTime = 0f;     // Runs constantly
-    private float uiSceneTime = 0f;    // Runs only in UI scene
-    private float gameSceneTime = 0f;  // Runs only in Game scene
-
-    private Interstitial interstitialAd;
-    private string currentScene;
     private bool adShownThisCycle = false;
+
+    private string currentScene;
+    private Interstitial interstitialAd;
+    private UpgradePopupManager popupManager;
 
     private void Awake()
     {
@@ -33,7 +32,7 @@ public class AdTimerManager : MonoBehaviour
 
         interstitialAd = FindObjectOfType<Interstitial>();
         if (interstitialAd == null)
-            Debug.LogWarning("AdTimerManager: Interstitial not found. Ads won't show until detected.");
+            Debug.LogWarning("AdTimerManager: Interstitial not found.");
 
         currentScene = SceneManager.GetActiveScene().name;
     }
@@ -48,40 +47,28 @@ public class AdTimerManager : MonoBehaviour
         currentScene = scene.name;
         interstitialAd = FindObjectOfType<Interstitial>();
 
-        // ✅ Correctly find inactive popup objects in the loaded scene
         popupManager = Resources.FindObjectsOfTypeAll<UpgradePopupManager>()
             .FirstOrDefault(m => m.gameObject.scene.isLoaded);
 
-        // Debug confirmation   
-        if (popupManager != null)
-            Debug.Log("✅ Found UpgradePopupManager — ready to show popup!");
-        else
-            Debug.LogWarning("⚠️ Could not find UpgradePopupManager — popup won't appear!");
-
-        Debug.Log($"AdTimerManager: Scene changed to {scene.name}");
         adShownThisCycle = false;
 
-        // Check immediately when returning to UI scene
         if (IsUIScene())
             TryShowAd();
     }
 
-
     private void Update()
     {
         globalTime += Time.deltaTime;
+        Debug.Log($"[AdTimer] Global={globalTime:F1}, Shown={adShownThisCycle}");
 
-        // UI Scene timer
         if (IsUIScene())
         {
             uiSceneTime += Time.deltaTime;
 
-            // Check during idle time in menu
             if (globalTime >= AdTriggerTime && !adShownThisCycle)
                 TryShowAd();
         }
-        // Game Scene timer
-        else if (IsGameScene())
+        else
         {
             gameSceneTime += Time.deltaTime;
         }
@@ -92,40 +79,40 @@ public class AdTimerManager : MonoBehaviour
         return currentScene.Equals("ui scene", System.StringComparison.OrdinalIgnoreCase);
     }
 
-    private bool IsGameScene()
-    {
-        return !IsUIScene(); // Any non-UI scene is considered a game scene here
-    }
-
     private void TryShowAd()
     {
-        if (!IsUIScene()) return; // Show ads only in UI scene
+        if (!IsUIScene()) return;
         if (adShownThisCycle) return;
 
-        if (globalTime >= AdTriggerTime)
+        if (globalTime < AdTriggerTime) return;
+
+        if (interstitialAd != null && interstitialAd._adLoaded)
         {
-            if (interstitialAd != null && interstitialAd._adLoaded)
-            {
-                Debug.Log($"AdTimerManager: Showing ad. Total={globalTime:F1}s | UI={uiSceneTime:F1}s | Game={gameSceneTime:F1}s");
-                interstitialAd.ShowAd();
-                adsShownCount++;
-                if (adsShownCount % 4 == 0 && popupManager != null)
-                {
-                    Debug.Log("Showing upgrade popup after 4th ad.");
-                    popupManager.ShowPopup();
-                }
+            Debug.Log(
+                $"AdTimerManager: Showing ad | Global={globalTime:F1}s UI={uiSceneTime:F1}s Game={gameSceneTime:F1}s"
+            );
 
+            interstitialAd.ShowAd();
+            adsShownCount++;
 
-                globalTime = 0f;
-                uiSceneTime = 0f;
-                gameSceneTime = 0f;
-                adShownThisCycle = true;
-            }
-            else
+            if (adsShownCount >= 4 && popupManager != null)
             {
-                Debug.Log("AdTimerManager: Ad not ready. Loading for next cycle.");
-                interstitialAd?.LoadAd();
+                popupManager.ShowPopup();
+                adsShownCount = 0;
             }
+
+            // Reset timers for next cycle
+            globalTime = 0f;
+            uiSceneTime = 0f;
+            gameSceneTime = 0f;
+
+            // 🔑 IMPORTANT FIX: re-arm the next ad cycle
+            adShownThisCycle = false;
+        }
+        else
+        {
+            Debug.Log("AdTimerManager: Ad not ready. Requesting load.");
+            interstitialAd?.LoadAd();
         }
     }
 }
