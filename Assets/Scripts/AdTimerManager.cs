@@ -59,7 +59,6 @@ public class AdTimerManager : MonoBehaviour
     private void Update()
     {
         globalTime += Time.deltaTime;
-        Debug.Log($"[AdTimer] Global={globalTime:F1}, Shown={adShownThisCycle}");
 
         if (IsUIScene())
         {
