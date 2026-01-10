@@ -1,0 +1,46 @@
+# Project Notes (Recent Changes)
+
+## GameManager updates
+- Added **initialization guard** (`isInitialized`) to prevent duplicate/partial setup across scene loads.
+- Added **duplicate GameManager detection** in `Awake()` (destroys extra instances).
+- Added **initial maze setup** (`SetupInitialMaze()`): disables all mazes, enables the selected maze by tag (`Maze{n}`), then updates UI.
+- Added **maze UI label** (`mazeLabel`) with `UpdateMazeLabel()` (shows `Maze - X`).
+
+## Physics / startup stability
+- Re-enabled **Player ↔ Ghosts** layer collisions at `Start()`.
+- Added **delayed scene start** (`DelayedStart()` waits 1 frame) to avoid missing references.
+- Added **physics sync helpers** (`FixPhysicsLayers()` + `FinalPhysicsFix()`) to ensure collisions are re-enabled and transforms are synced.
+
+## Per-maze setup improvements
+- `SetupCurrentScene()` now:
+  - Activates the current maze and updates the maze label.
+  - Enables only the active maze’s `NavMeshSurface`.
+  - Rebuilds the **ghost list** from `Maze/Ghosts`.
+  - Forces pellet container lookup to `Maze/Pellets`.
+  - Finds `Nodes`, plus **inside/outside** respawn transforms (supports multiple naming variants).
+  - Calls `SetupGhosts()` to enable only `NumberOfGhosts`, set speed, and configure `home`.
+
+## Gameplay flow
+- Refined **new game vs death reset** flow:
+  - `InitialGameSetup()` starts immediately (no countdown) for new rounds.
+  - `ResetState()` is used for death (includes pause/countdown behavior).
+- Added **hit protection** using `pacmanIsBeingHit` to prevent multiple life losses per collision.
+
+## Ghost respawn (major fix)
+- Rewrote `GhostEaten()` / `RespawnGhost()`:
+  - Disables behaviors + collider, stops agent, hides model, warps to inside spawn.
+  - Waits, then restores model + collider, resets state, re-enables home behavior.
+
+## Level completion / pellet handling
+- `HasRemainingPellets()` now counts active pellets under the **current maze pellet container** (including nested).
+- `PelletEaten()` advances only when **no pellets remain** in the current maze.
+- Added **last maze completion behavior**: stops movement/timer and returns to `"ui scene"` after a delay using unscaled time.
+
+## Save data
+- `SaveData()` now stores:
+  - **Last run time** (seconds + formatted string).
+  - **Best time** (compares using seconds for correctness).
+
+## Pause/resume
+- Improved pause: disables camera-moving objects, shows pause screen, re-enables `PausePanelScript`.
+- Resume uses a countdown coroutine (`WaitAfterResumingGame`) and toggles ghost agents appropriately.
