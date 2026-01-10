@@ -638,10 +638,19 @@ public class GameManager : MonoBehaviour
         string KeyTotalTimeInSec = SaveTimeStr + "TotalTime";
         string KeyTotalTimeInStr = SaveTimeStr + "TotalTimeStr";
 
+        // Always store the last run (useful if UI wants to show the most recent time)
+        string KeyLastTimeInSec = SaveTimeStr + "LastTime";
+        string KeyLastTimeInStr = SaveTimeStr + "LastTimeStr";
+
+        int currentSeconds = Mathf.RoundToInt(TotalTimeInSeconds);
+        PlayerPrefs.SetInt(KeyLastTimeInSec, currentSeconds);
+        PlayerPrefs.SetString(KeyLastTimeInStr, TimeMaking());
+
         int previousTime = PlayerPrefs.GetInt(KeyTotalTimeInSec, int.MaxValue);
-        if (TotalTimeInSeconds < previousTime)
+        // Store best time (compare in the same unit we persist)
+        if (currentSeconds < previousTime)
         {
-            PlayerPrefs.SetInt(KeyTotalTimeInSec, Mathf.RoundToInt(TotalTimeInSeconds));
+            PlayerPrefs.SetInt(KeyTotalTimeInSec, currentSeconds);
             PlayerPrefs.SetString(KeyTotalTimeInStr, TimeMaking());
         }
     }
@@ -1098,7 +1107,9 @@ public class GameManager : MonoBehaviour
             // Hide Pacman and stop game logic
             if (pacman != null)
                 pacman.gameObject.SetActive(false);
-            SaveData(MazeNumber, NumberOfGhosts, GhostSpeed);
+            // Save using 1-based maze index to match scoreboard/UI numbering
+            SaveData(MazeNumber + 1, NumberOfGhosts, GhostSpeed);
+            PlayerPrefs.Save();
 
             timeStop = true;
             isGameOver = true;
