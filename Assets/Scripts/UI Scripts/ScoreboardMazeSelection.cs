@@ -6,16 +6,6 @@ using UnityEngine.UI;
 public class ScoreboardMazeSelection : MonoBehaviour
 {
     Controllers controller;
-    Controllers Controller
-    {
-        get
-        {
-            if (controller == null)
-                controller = new Controllers();
-            return controller;
-        }
-        set => controller = value;
-    }
 
     [SerializeField] GameObject[] MazeScoringPanels;
     [SerializeField] Image[] ButtonsBack;
@@ -25,29 +15,70 @@ public class ScoreboardMazeSelection : MonoBehaviour
     int CurrentButton = 0;
     bool isController = false;
     CanvasScript canvasScript;
+    bool inputsHooked = false;
+    bool isSwitchingScreen = false;
 
     private void Awake()
     {
         canvasScript = FindObjectOfType<CanvasScript>();
-        Controller.Gamepad.Movement.started += Rotation_started;
-        Controller.Gamepad.ButtonRight.canceled += ButtonRight_canceled;
-        Controller.Gamepad.ButtonLeft.canceled += ButtonLeft_canceled;
-        Controller.Gamepad.ButtonDown.canceled += ButtonDown_canceled;
+        controller = new Controllers();
     }
 
-    private void ButtonDown_canceled(UnityEngine.InputSystem.InputAction.CallbackContext obj)
+    void HookInputs()
+    {
+        if (controller == null || inputsHooked)
+            return;
+
+        controller.Gamepad.Movement.started += Rotation_started;
+        controller.Gamepad.ButtonRight.performed += ButtonRight_performed;
+        controller.Gamepad.ButtonLeft.performed += ButtonLeft_performed;
+        controller.Gamepad.ButtonDown.performed += ButtonDown_performed;
+        inputsHooked = true;
+    }
+
+    void UnhookInputs()
+    {
+        if (controller == null || !inputsHooked)
+            return;
+
+        controller.Gamepad.Movement.started -= Rotation_started;
+        controller.Gamepad.ButtonRight.performed -= ButtonRight_performed;
+        controller.Gamepad.ButtonLeft.performed -= ButtonLeft_performed;
+        controller.Gamepad.ButtonDown.performed -= ButtonDown_performed;
+        inputsHooked = false;
+    }
+
+    IEnumerator SwitchToScreenNextFrame(GameObject nextScreen)
+    {
+        if (isSwitchingScreen)
+            yield break;
+
+        isSwitchingScreen = true;
+
+        // Important for Android/InputSystem reliability: don't disable this GameObject
+        // while we're still inside an input callback.
+        yield return null;
+
+        gameObject.SetActive(false);
+        if (nextScreen != null)
+            nextScreen.SetActive(true);
+
+        isSwitchingScreen = false;
+    }
+
+    private void ButtonDown_performed(UnityEngine.InputSystem.InputAction.CallbackContext obj)
     {
         if (isController)
             OpenInfoPanel();
     }
 
-    private void ButtonLeft_canceled(UnityEngine.InputSystem.InputAction.CallbackContext obj)
+    private void ButtonLeft_performed(UnityEngine.InputSystem.InputAction.CallbackContext obj)
     {
         if(isController)
             ClickBackButton();
     }
 
-    private void ButtonRight_canceled(UnityEngine.InputSystem.InputAction.CallbackContext obj)
+    private void ButtonRight_performed(UnityEngine.InputSystem.InputAction.CallbackContext obj)
     {
         if (isController)
         {
@@ -58,8 +89,10 @@ public class ScoreboardMazeSelection : MonoBehaviour
     public void SelectScoringMaze(int mazeNumber)
     {
         canvasScript.audioManager.Play("select");
-        this.gameObject.SetActive(false);
-        MazeScoringPanels[mazeNumber].SetActive(true);
+        if (MazeScoringPanels == null || mazeNumber < 0 || mazeNumber >= MazeScoringPanels.Length)
+            return;
+
+        StartCoroutine(SwitchToScreenNextFrame(MazeScoringPanels[mazeNumber]));
     }
 
     private void Rotation_started(UnityEngine.InputSystem.InputAction.CallbackContext obj)
@@ -91,8 +124,7 @@ public class ScoreboardMazeSelection : MonoBehaviour
     public void ClickBackButton()
     {
         canvasScript.audioManager.Play("back");
-        gameObject.SetActive(false);
-        ReturnScreen.SetActive(true);
+        StartCoroutine(SwitchToScreenNextFrame(ReturnScreen));
     }
 
     public void OpenInfoPanel()
@@ -115,17 +147,56 @@ public class ScoreboardMazeSelection : MonoBehaviour
         {
             isController = true;
         }
+
+        if (ButtonsBack != null && ButtonsBack.Length > 0)
+        {
+            for (int i = 0; i < ButtonsBack.Length; i++)
+            {
+                if (ButtonsBack[i] != null)
+                    ButtonsBack[i].color = Color.black;
+            }
+
+            CurrentButton = Mathf.Clamp(CurrentButton, 0, ButtonsBack.Length - 1);
+        }
+
         if (isController)
         {
-            Controller.Enable();
-            ButtonsBack[CurrentButton].color = HovorColor;
+            HookInputs();
+            controller.Enable();
+            if (ButtonsBack != null && ButtonsBack.Length > 0 && ButtonsBack[CurrentButton] != null)
+                ButtonsBack[CurrentButton].color = HovorColor;
         }
         else
-            ButtonsBack[CurrentButton].color = Color.black;
+        {
+            UnhookInputs();
+            if (controller != null)
+                controller.Disable();
+            if (ButtonsBack != null && ButtonsBack.Length > 0 && ButtonsBack[CurrentButton] != null)
+                ButtonsBack[CurrentButton].color = Color.black;
+        }
     }
     private void OnDisable()
     {
+        if (controller == null)
+            return;
+
+        UnhookInputs();
+        controller.Disable();
+    }
+
+    private void OnApplicationFocus(bool hasFocus)
+    {
+        // Android builds can temporarily lose focus and leave InputActions disabled.
+        if (!hasFocus)
+            return;
+
+        if (!isActiveAndEnabled || controller == null)
+            return;
+
         if (isController)
-            Controller.Disable();
+        {
+            HookInputs();
+            controller.Enable();
+        }
     }
 }
